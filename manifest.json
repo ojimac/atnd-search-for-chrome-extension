@@ -1,0 +1,12 @@
+{
+	"name": "ATND検索 Chrome Extension",
+	"version": "0.0.1",
+	"description": "ATND検索のgoogle chrome 拡張版です",
+	"browser_action": {
+		"default_icon": "atnd-kensaku.png",
+		"popup":"popup.html"
+	},
+	"permissions": [
+		"http://api.atnd.org/"
+	 ]
+}

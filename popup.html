@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<meta charset="utf-8">
+<head>
+<style>
+body {
+  min-width:500px;
+  overflow-x:hidden;
+  font-family: serif;
+}
+li {
+	list-style:none;
+}
+</style>
+
+<script>
+var req = new XMLHttpRequest();
+req.open(
+    "GET",
+    "http://api.atnd.org/events/?format=json&count=100",
+    true);
+//req.onload = showPhotos;
+req.onload = showEvents;
+req.send(null);
+
+function showEvents() {
+	var html = '';
+	var res = JSON.parse(req.responseText);
+	console.log(res);
+	for (var i = 0, event; event = res.events[i]; i++) {
+		html += '<li>' +
+			(i+1) +
+			'. ' +
+			'<a href="' +
+			event.event_url +
+			'" target="_blank">' +
+			event.title +
+			'</a></li>';
+	}
+	document.getElementById('atnd_data').innerHTML = html;
+}
+</script>
+</head>
+<body>
+	<h1>ATND検索<br />Google Chrome Extension版</h1>
+	<input id="keyword" type="text">を検索
+	<div id="latest_events">最新イベント</div>
+	<ul id="atnd_data">
+	</ul>
+</body>
+</html>
