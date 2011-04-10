@@ -4,29 +4,81 @@
 <head>
 <style>
 body {
-  min-width:500px;
-  overflow-x:hidden;
-  font-family: serif;
+	min-width:500px;
+	*overflow-x:hidden;
+	font-family: serif;
 }
+
 li {
 	list-style:none;
 }
 </style>
 
 <script>
+var API_URL = 'http://api.atnd.org/events/?format=json&count=30';
 var req = new XMLHttpRequest();
+var baseTime = new Date();
+var keyword_save = "~^|"; //dummy
 req.open(
-    "GET",
-    "http://api.atnd.org/events/?format=json&count=100",
-    true);
-//req.onload = showPhotos;
+	"GET",
+	API_URL,
+	true
+);
 req.onload = showEvents;
 req.send(null);
+
+window.onload = function() {
+	var q = document.getElementById("q");
+	q.addEventListener("keyup", searchEvents, false);
+	setInterval("searchEvents('1')", 1000); 
+}
+
+function searchEvents(flg) {
+	//キーワード欄への入力内容
+	var q = document.getElementById('q').value;
+	//URIエンコード
+	var keyword = encodeURI(q);
+
+	//前回入力時刻との差（ミリ秒）
+	var elapsed = parseInt((new Date()).getTime() - baseTime.getTime());
+
+	//基準時間の更新
+	baseTime = new Date();
+
+	//600ミリ秒内に次の文字が入力された場合はキーワード入力中とみなして中断する
+	if (elapsed < 600) { 
+		//keyword_save = keyword; //キーワード保存
+		return; 
+	} 
+	if (!req) req = XmlHttpRequest();
+	if (!req || req.readyState == 1 || req.readyState == 2 || req.readyState == 3) {
+		//keyword_save = keyword; //キーワード保存
+		return; 
+	}
+
+	if (keyword_save != keyword) {
+		req.open(
+			"GET",
+			API_URL + "&keyword=" + keyword,
+			true
+		);
+		//XMLHttpRequestオブジェクトの状態が変化する度に呼びだされるイベントハンドラ
+		req.onreadystatechange = function() {
+			if (req.readyState == 4 && req.status == 200) {
+				//responseText
+				document.getElementById("result").innerHTML = req.responseText;
+			}
+		}
+		req.send(null)
+		//キーワード保存
+		keyword_save = keyword;
+	}
+}
 
 function showEvents() {
 	var html = '';
 	var res = JSON.parse(req.responseText);
-	console.log(res);
+	//console.log(res);
 	for (var i = 0, event; event = res.events[i]; i++) {
 		html += '<li>' +
 			(i+1) +
@@ -39,12 +91,12 @@ function showEvents() {
 	}
 	document.getElementById('atnd_data').innerHTML = html;
 }
+
 </script>
 </head>
 <body>
-	<h1>ATND検索<br />Google Chrome Extension版</h1>
-	<input id="keyword" type="text">を検索
-	<div id="latest_events">最新イベント</div>
+	<h1>ATND検索<br />for Google Chrome Extension</h1>
+	<input id="q" type="text">を検索
 	<ul id="atnd_data">
 	</ul>
 </body>
